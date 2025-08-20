@@ -1,0 +1,28 @@
+name: Mirror release.* branches to release
+
+on:
+  push:
+    branches:
+      - 'release.*'   # any branch starting with release.
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so we can mirror
+
+      - name: Push to release branch
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # Ensure we're on the source branch
+          SOURCE_BRANCH="${GITHUB_REF#refs/heads/}"
+          echo "Source branch is: $SOURCE_BRANCH"
+
+          # Add remote and push (overwrite release branch)
+          git checkout $SOURCE_BRANCH
+          git push origin HEAD:release --force
